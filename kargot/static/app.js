@@ -3,7 +3,8 @@ const $ = (id) => document.getElementById(id);
 const state = { me: null, chats: [], chatId: null, models: [], controller: null };
 
 async function api(path, opts = {}) {
-  const res = await fetch(path, {
+  // Relative Pfade, damit es auch unter Home Assistant (Ingress) funktioniert
+  const res = await fetch(path.replace(/^\//, ""), {
     ...opts,
     headers: { "Content-Type": "application/json", ...(opts.headers || {}) },
     body: opts.body ? JSON.stringify(opts.body) : undefined,
@@ -52,6 +53,9 @@ async function start() {
   document.querySelectorAll(".ai-name").forEach((el) => (el.textContent = state.me.ai_name));
   document.title = state.me.ai_name;
   $("username").textContent = state.me.username;
+  // Bei Anmeldung über Home Assistant: kein Abmelden / Passwort nötig
+  $("logout").classList.toggle("hidden", state.me.ha_login);
+  $("password-section").classList.toggle("hidden", state.me.ha_login);
   $("welcome-text").textContent = `Hallo ${state.me.username}!`;
   await Promise.all([loadModels(), loadChats()]);
   const fromHash = parseInt(location.hash.slice(1));
@@ -312,7 +316,7 @@ $("settings-form").addEventListener("submit", async (e) => {
     const system_prompt = $("system-prompt").value;
     await api("/api/settings", { method: "PUT", body: { system_prompt } });
     state.me.system_prompt = system_prompt;
-    if ($("pw-new").value) {
+    if (!state.me.ha_login && $("pw-new").value) {
       await api("/api/password", { method: "PUT", body: { old: $("pw-old").value, new: $("pw-new").value } });
       $("pw-old").value = $("pw-new").value = "";
     }

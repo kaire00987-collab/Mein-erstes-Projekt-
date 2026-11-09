@@ -1,6 +1,6 @@
 services:
   app:
-    build: ./app
+    build: ./kargot
     restart: unless-stopped
     ports:
       - "3000:8000"                   # links: Port, unter dem die Seite erreichbar ist

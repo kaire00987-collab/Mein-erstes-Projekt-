@@ -132,6 +132,18 @@ def user_for_token(token: str) -> sqlite3.Row | None:
         ).fetchone()
 
 
+def get_or_create_user(username: str) -> sqlite3.Row:
+    """Für die Anmeldung über Home Assistant: Konto beim ersten Besuch automatisch anlegen."""
+    with connect() as conn:
+        conn.execute(
+            "INSERT OR IGNORE INTO users (username, pw_hash, created) VALUES (?, ?, ?)",
+            (username, hash_password(secrets.token_urlsafe(32)), time.time()),
+        )
+        return conn.execute(
+            "SELECT id, username, system_prompt FROM users WHERE username = ?", (username,)
+        ).fetchone()
+
+
 def set_system_prompt(user_id: int, prompt: str) -> None:
     with connect() as conn:
         conn.execute("UPDATE users SET system_prompt = ? WHERE id = ?", (prompt, user_id))

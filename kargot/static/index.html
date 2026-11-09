@@ -4,17 +4,17 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Kargot</title>
-  <link rel="manifest" href="/manifest.webmanifest">
-  <link rel="icon" href="/static/icon.svg">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="static/icon.svg">
   <meta name="theme-color" content="#1f1e1d">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="static/style.css">
 </head>
 <body>
   <!-- Anmeldung -->
   <div id="login-view" class="login hidden">
     <form id="login-form" class="login-box">
-      <img src="/static/icon.svg" alt="" class="login-logo">
+      <img src="static/icon.svg" alt="" class="login-logo">
       <h1 class="ai-name">Kargot</h1>
       <input id="login-user" placeholder="Benutzername" autocomplete="username" required>
       <input id="login-pass" type="password" placeholder="Passwort" autocomplete="current-password" required>
@@ -50,7 +50,7 @@
 
       <section id="messages" class="messages">
         <div id="welcome" class="welcome">
-          <img src="/static/icon.svg" alt="" class="welcome-logo">
+          <img src="static/icon.svg" alt="" class="welcome-logo">
           <h1 id="welcome-text">Hallo!</h1>
           <p>Wie kann ich helfen?</p>
         </div>
@@ -73,9 +73,11 @@
       <h3>Persönliche Anweisungen</h3>
       <p class="muted">Was soll die KI über dich wissen und wie soll sie antworten? (Gilt nur für dein Konto.)</p>
       <textarea id="system-prompt" rows="8" placeholder="z. B. Ich heiße Lena, studiere Medizin und mag kurze Antworten mit Beispielen."></textarea>
-      <h3 class="section">Passwort ändern</h3>
-      <input id="pw-old" type="password" placeholder="Altes Passwort" autocomplete="current-password">
-      <input id="pw-new" type="password" placeholder="Neues Passwort (leer lassen = nicht ändern)" autocomplete="new-password">
+      <div id="password-section">
+        <h3 class="section">Passwort ändern</h3>
+        <input id="pw-old" type="password" placeholder="Altes Passwort" autocomplete="current-password">
+        <input id="pw-new" type="password" placeholder="Neues Passwort (leer lassen = nicht ändern)" autocomplete="new-password">
+      </div>
       <p id="settings-error" class="error"></p>
       <div class="dialog-actions">
         <button value="cancel" class="secondary">Abbrechen</button>
@@ -84,7 +86,7 @@
     </form>
   </dialog>
 
-  <script src="/static/markdown.js"></script>
-  <script src="/static/app.js"></script>
+  <script src="static/markdown.js"></script>
+  <script src="static/app.js"></script>
 </body>
 </html>

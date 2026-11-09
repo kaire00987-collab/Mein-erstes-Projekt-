@@ -1,4 +1,4 @@
-"""Unsere eigene KI: Web-Server, der mit Ollama (lokales Sprachmodell) spricht."""
+"""Kargot: Web-Server für den eigenen KI-Chat (Claude über die API, optional Ollama)."""
 import json
 import os
 import time
@@ -12,6 +12,20 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 import db
+
+# Als Home-Assistant-Add-on stehen die Einstellungen in /data/options.json
+HA_OPTIONS = Path("/data/options.json")
+if HA_OPTIONS.exists():
+    _opts = json.loads(HA_OPTIONS.read_text())
+    for _key, _env in {"api_key": "ANTHROPIC_API_KEY", "ai_name": "AI_NAME",
+                       "model": "DEFAULT_MODEL", "effort": "CLAUDE_EFFORT"}.items():
+        if _opts.get(_key):
+            os.environ.setdefault(_env, str(_opts[_key]))
+    os.environ.setdefault("HA_INGRESS", "true")
+
+# Anfragen über Home Assistant (Ingress) kommen immer von dieser Adresse
+HA_INGRESS = os.environ.get("HA_INGRESS", "false").lower() == "true"
+HA_PROXY_IP = os.environ.get("HA_PROXY_IP", "172.30.32.2")
 
 OLLAMA_URL = os.environ.get("OLLAMA_URL", "").rstrip("/")  # leer = keine Offline-Modelle
 ANTHROPIC_KEY = os.environ.get("ANTHROPIC_API_KEY", "").strip()
@@ -50,7 +64,21 @@ for entry in os.environ.get("INITIAL_USERS", "").split(","):
 
 # --- Anmeldung ---
 
-def current_user(session: str | None = Cookie(default=None)):
+COOKIE = "kargot_session"
+
+
+def ha_username(request: Request) -> str | None:
+    """Über Home Assistant angemeldete Person – nur vertrauen, wenn die Anfrage wirklich von HA kommt."""
+    if HA_INGRESS and request.client and request.client.host == HA_PROXY_IP:
+        name = request.headers.get("X-Remote-User-Name", "").strip()
+        return name or None
+    return None
+
+
+def current_user(request: Request, session: str | None = Cookie(default=None, alias=COOKIE)):
+    name = ha_username(request)
+    if name:
+        return db.get_or_create_user(name)
     user = db.user_for_token(session) if session else None
     if not user:
         raise HTTPException(401, "Nicht angemeldet")
@@ -69,22 +97,23 @@ def login(data: LoginIn, response: Response):
         time.sleep(1)  # bremst Passwort-Raten
         raise HTTPException(401, "Benutzername oder Passwort falsch")
     response.set_cookie(
-        "session", token, httponly=True, samesite="lax", secure=COOKIE_SECURE, max_age=60 * 60 * 24 * 365
+        COOKIE, token, httponly=True, samesite="lax", secure=COOKIE_SECURE, max_age=60 * 60 * 24 * 365
     )
     return {"ok": True}
 
 
 @app.post("/api/logout")
-def logout(response: Response, session: str | None = Cookie(default=None)):
+def logout(response: Response, session: str | None = Cookie(default=None, alias=COOKIE)):
     if session:
         db.logout(session)
-    response.delete_cookie("session")
+    response.delete_cookie(COOKIE)
     return {"ok": True}
 
 
 @app.get("/api/me")
-def me(user=Depends(current_user)):
+def me(request: Request, user=Depends(current_user)):
     return {
+        "ha_login": ha_username(request) is not None,
         "username": user["username"],
         "system_prompt": user["system_prompt"],
         "ai_name": AI_NAME,
@@ -116,7 +145,7 @@ def change_password(data: PasswordIn, response: Response, user=Depends(current_u
     db.set_password(user["username"], data.new)  # meldet alle Geräte ab
     token = db.login(user["username"], data.new)
     response.set_cookie(
-        "session", token, httponly=True, samesite="lax", secure=COOKIE_SECURE, max_age=60 * 60 * 24 * 365
+        COOKIE, token, httponly=True, samesite="lax", secure=COOKIE_SECURE, max_age=60 * 60 * 24 * 365
     )
     return {"ok": True}
 
@@ -330,9 +359,9 @@ def manifest(request: Request):
     return {
         "name": AI_NAME,
         "short_name": AI_NAME,
-        "start_url": "/",
+        "start_url": "./",
         "display": "standalone",
         "background_color": "#1f1e1d",
         "theme_color": "#1f1e1d",
-        "icons": [{"src": "/static/icon.svg", "sizes": "any", "type": "image/svg+xml"}],
+        "icons": [{"src": "static/icon.svg", "sizes": "any", "type": "image/svg+xml"}],
     }

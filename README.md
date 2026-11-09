@@ -1,6 +1,6 @@
 # Kargot – eure private KI
 
-**Kargot** ist euer eigener KI-Chat für zwei. Er läuft auf **eurer Synology NAS**:
+**Kargot** ist euer eigener KI-Chat für zwei. Er läuft als **Add-on in Home Assistant** (oder alternativ auf einer Synology NAS):
 
 - 🧠 Im Hintergrund arbeitet **Claude** von Anthropic (über die offizielle API) – Kargot ist euer eigener Name und eure eigene Oberfläche dafür
 - 💾 **Alle Chats und Konten werden nur auf eurer NAS gespeichert**, nicht in einer Cloud
@@ -14,7 +14,7 @@
 
 | | Wo? |
 |---|---|
-| Chat-Verlauf, Konten, Passwörter (verschlüsselt), Einstellungen | **Nur auf eurer NAS** (`data/ki.db`) |
+| Chat-Verlauf, Konten, Einstellungen | **Nur auf eurem Server** (Home Assistant bzw. NAS) |
 | Die Nachrichten des aktuellen Chats | Werden zum Beantworten an Anthropic (die Firma hinter Claude) geschickt |
 
 Damit Kargot antworten kann, muss Claude im Hintergrund den Chat lesen. Das geht technisch nicht anders. Laut Anthropic werden
@@ -37,7 +37,46 @@ Oben rechts im Chat könnt ihr jederzeit das Modell wechseln. **Tipp:** Legt im 
 
 ---
 
-## Einrichtung auf der Synology (ca. 20 Minuten)
+## Einrichtung in Home Assistant (ca. 10 Minuten) – empfohlen
+
+Voraussetzung: Home Assistant **OS** (steht unter *Einstellungen → System → Info → Installationsmethode*).
+
+### Schritt 1: API-Schlüssel holen
+
+1. Auf **https://platform.claude.com** ein Konto anlegen
+2. Unter **Billing** Guthaben aufladen
+3. Unter **API Keys** → **Create Key** einen Schlüssel erstellen und kopieren (beginnt mit `sk-ant-`)
+   – der Schlüssel ist wie ein Passwort, nicht weitergeben!
+
+### Schritt 2: Add-on installieren
+
+1. In Home Assistant: **Einstellungen → Add-ons → Add-on Store**
+2. Oben rechts **⋮ → Repositories**
+3. Diese Adresse einfügen und **Hinzufügen**:
+   ```
+   https://github.com/kaire00987-collab/Mein-erstes-Projekt-
+   ```
+4. Fenster schließen, Seite neu laden. Unten erscheint **Kargot** → antippen → **Installieren**
+   (dauert ein paar Minuten)
+
+### Schritt 3: Einrichten und starten
+
+1. Im Add-on auf **Konfiguration** → API-Schlüssel einfügen → **Speichern**
+2. Auf **Info** → **Starten**, und **„In Seitenleiste anzeigen“** einschalten
+3. Links in der Seitenleiste auf **Kargot** tippen – fertig!
+
+Ihr seid automatisch mit eurem Home-Assistant-Konto angemeldet. Jede Person, die ein eigenes Konto in
+Home Assistant hat, bekommt in Kargot automatisch ihre eigenen, privaten Chats.
+Am Handy funktioniert Kargot direkt in der **Home-Assistant-App** – auch von unterwegs, wenn ihr Home Assistant
+von außen erreicht (z. B. über Home Assistant Cloud).
+
+**Backup:** Die Chats sind automatisch in euren normalen Home-Assistant-Backups enthalten.
+
+**Updates:** Wenn es eine neue Version gibt, zeigt Home Assistant sie wie bei jedem anderen Add-on an.
+
+---
+
+## Alternative: Einrichtung auf der Synology (ca. 20 Minuten)
 
 ### Voraussetzung
 
@@ -48,10 +87,7 @@ keine Container ausführen (meist die „j“-Modelle); dann meldet euch, es gib
 
 ### Schritt 1: API-Schlüssel holen
 
-1. Auf **https://platform.claude.com** ein Konto anlegen
-2. Unter **Billing** Guthaben aufladen
-3. Unter **API Keys** → **Create Key** einen Schlüssel erstellen und kopieren (beginnt mit `sk-ant-`)
-   – der Schlüssel ist wie ein Passwort, nicht weitergeben!
+Wie oben bei Home Assistant beschrieben.
 
 ### Schritt 2: Dateien auf die NAS kopieren
 
@@ -92,7 +128,7 @@ Mit dem Namen und Startpasswort anmelden und dann über **⚙︎** (unten links)
 
 ## Weitere Einstellungen
 
-In `einstellungen.env`:
+In Home Assistant unter **Add-on → Konfiguration**, auf der Synology in `einstellungen.env`:
 
 | Einstellung | Bedeutung |
 |---|---|
@@ -132,9 +168,11 @@ Lokale Modelle erscheinen dann zusätzlich in der Modellauswahl.
 
 **Aufbau:**
 ```
-docker-compose.yml   startet die App (und optional Ollama)
-app/main.py          Webserver (Python/FastAPI): Login, Chats, Anbindung an Claude bzw. Ollama
-app/db.py            Datenbank (SQLite)
-app/manage.py        Benutzerverwaltung per Kommandozeile
-app/static/          Oberfläche (HTML, CSS, JavaScript – ohne externe Dateien)
+repository.yaml      macht das Projekt zum Home-Assistant-Add-on-Repository
+kargot/config.yaml   Add-on-Beschreibung für Home Assistant
+docker-compose.yml   Start auf der Synology (und optional Ollama)
+kargot/main.py       Webserver (Python/FastAPI): Login, Chats, Anbindung an Claude bzw. Ollama
+kargot/db.py         Datenbank (SQLite)
+kargot/manage.py     Benutzerverwaltung per Kommandozeile
+kargot/static/       Oberfläche (HTML, CSS, JavaScript – ohne externe Dateien)
 ```
