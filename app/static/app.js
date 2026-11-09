@@ -18,9 +18,9 @@ async function api(path, opts = {}) {
 const json = async (path, opts) => (await api(path, opts)).json();
 
 const MODEL_LABELS = {
-  "claude-opus-5-5": "Claude Opus 5.5",
-  "claude-sonnet-5-5": "Claude Sonnet 5.5",
-  "claude-haiku-5-5": "Claude Haiku 5.5",
+  "claude-opus-5-5": "Kargot Max",
+  "claude-sonnet-5-5": "Kargot Schnell",
+  "claude-haiku-5-5": "Kargot Mini",
 };
 
 // ---------- Anmeldung ----------

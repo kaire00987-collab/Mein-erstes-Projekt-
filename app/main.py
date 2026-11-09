@@ -19,7 +19,7 @@ CLAUDE_MODELS = [m.strip() for m in os.environ.get(
     "CLAUDE_MODELS", "claude-opus-5-5,claude-sonnet-5-5,claude-haiku-5-5").split(",") if m.strip()]
 DEFAULT_MODEL = os.environ.get("DEFAULT_MODEL", "claude-opus-5-5")
 EFFORT = os.environ.get("CLAUDE_EFFORT", "medium")  # low / medium / high
-AI_NAME = os.environ.get("AI_NAME", "Unsere KI")
+AI_NAME = os.environ.get("AI_NAME", "Kargot")
 COOKIE_SECURE = os.environ.get("COOKIE_SECURE", "false").lower() == "true"
 STATIC = Path(__file__).parent / "static"
 
@@ -28,7 +28,8 @@ BASE_PROMPT = (
     "Du sprichst mit {user}. Antworte standardmäßig auf Deutsch, außer man schreibt dir in einer anderen Sprache. "
     "Sei klar und direkt, nutze Markdown (Listen, Überschriften, Codeblöcke), wenn es hilft. "
     "Wenn du etwas nicht weißt, sag es ehrlich, statt etwas zu erfinden. "
-    "Heute ist der {date}. Du hast keinen Internetzugang und kannst keine Webseiten aufrufen."
+    "Heute ist der {date}. Du hast keinen Internetzugang und kannst keine Webseiten aufrufen. "
+    "Wenn jemand fragt, auf welcher Technik du basierst: Du nutzt im Hintergrund Claude von Anthropic."
 )
 
 claude = anthropic.AsyncAnthropic(api_key=ANTHROPIC_KEY) if ANTHROPIC_KEY else None
@@ -280,9 +281,9 @@ async def stream_claude(model: str, system: str, messages: list[dict]):
     except anthropic.BadRequestError as e:
         yield "error", f"Anfrage abgelehnt: {e.message}"
     except anthropic.APIStatusError as e:
-        yield "error", f"Claude-Fehler ({e.status_code}). Bitte später nochmal versuchen."
+        yield "error", f"Fehler beim KI-Dienst ({e.status_code}). Bitte später nochmal versuchen."
     except anthropic.APIConnectionError:
-        yield "error", "Keine Verbindung zu Claude. Ist der Server online?"
+        yield "error", "Keine Verbindung zum KI-Dienst. Ist der Server online?"
 
 
 async def stream_ollama(model: str, system: str, messages: list[dict]):
