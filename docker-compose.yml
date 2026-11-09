@@ -1,0 +1,29 @@
+services:
+  ollama:
+    image: ollama/ollama:latest
+    restart: unless-stopped
+    volumes:
+      - ./data/ollama:/root/.ollama   # heruntergeladene KI-Modelle
+    # Für NVIDIA-Grafikkarte die nächsten Zeilen einkommentieren:
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+
+  app:
+    build: ./app
+    restart: unless-stopped
+    depends_on:
+      - ollama
+    ports:
+      - "${PORT:-3000}:8000"
+    environment:
+      OLLAMA_URL: http://ollama:11434
+      AI_NAME: ${AI_NAME:-Unsere KI}
+      DEFAULT_MODEL: ${DEFAULT_MODEL:-qwen2.5:7b}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+    volumes:
+      - ./data:/data                  # Chats & Benutzer (ki.db)

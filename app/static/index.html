@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Unsere KI</title>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" href="/static/icon.svg">
+  <meta name="theme-color" content="#1f1e1d">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <!-- Anmeldung -->
+  <div id="login-view" class="login hidden">
+    <form id="login-form" class="login-box">
+      <img src="/static/icon.svg" alt="" class="login-logo">
+      <h1 class="ai-name">Unsere KI</h1>
+      <input id="login-user" placeholder="Benutzername" autocomplete="username" required>
+      <input id="login-pass" type="password" placeholder="Passwort" autocomplete="current-password" required>
+      <button type="submit">Anmelden</button>
+      <p id="login-error" class="error"></p>
+    </form>
+  </div>
+
+  <!-- App -->
+  <div id="app-view" class="app hidden">
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-head">
+        <span class="ai-name brand">Unsere KI</span>
+        <button id="close-sidebar" class="icon-btn mobile-only" title="Schließen">✕</button>
+      </div>
+      <button id="new-chat" class="new-chat">＋ Neuer Chat</button>
+      <input id="search" class="search" placeholder="Chats durchsuchen…">
+      <nav id="chat-list" class="chat-list"></nav>
+      <div class="sidebar-foot">
+        <span id="username" class="username"></span>
+        <button id="open-settings" class="icon-btn" title="Einstellungen">⚙︎</button>
+        <button id="logout" class="icon-btn" title="Abmelden">↪</button>
+      </div>
+    </aside>
+    <div id="backdrop" class="backdrop"></div>
+
+    <main class="main">
+      <header class="topbar">
+        <button id="open-sidebar" class="icon-btn mobile-only" title="Chats">☰</button>
+        <h2 id="chat-title" class="chat-title"></h2>
+        <select id="model-select" title="Modell"></select>
+      </header>
+
+      <section id="messages" class="messages">
+        <div id="welcome" class="welcome">
+          <img src="/static/icon.svg" alt="" class="welcome-logo">
+          <h1 id="welcome-text">Hallo!</h1>
+          <p>Wie kann ich helfen?</p>
+        </div>
+      </section>
+
+      <form id="composer" class="composer">
+        <div class="composer-box">
+          <textarea id="input" rows="1" placeholder="Schreib eine Nachricht…"></textarea>
+          <button id="send" type="submit" class="send" title="Senden">↑</button>
+          <button id="stop" type="button" class="send stop hidden" title="Stopp">■</button>
+        </div>
+        <p class="hint">Läuft offline auf eurem Server. Die KI kann Fehler machen.</p>
+      </form>
+    </main>
+  </div>
+
+  <!-- Einstellungen -->
+  <dialog id="settings">
+    <form method="dialog" id="settings-form">
+      <h3>Persönliche Anweisungen</h3>
+      <p class="muted">Was soll die KI über dich wissen und wie soll sie antworten? (Gilt nur für dein Konto.)</p>
+      <textarea id="system-prompt" rows="8" placeholder="z. B. Ich heiße Lena, studiere Medizin und mag kurze Antworten mit Beispielen."></textarea>
+      <div class="dialog-actions">
+        <button value="cancel" class="secondary">Abbrechen</button>
+        <button id="save-settings" value="save">Speichern</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="/static/markdown.js"></script>
+  <script src="/static/app.js"></script>
+</body>
+</html>
