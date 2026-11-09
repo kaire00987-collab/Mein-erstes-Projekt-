@@ -62,7 +62,7 @@
           <button id="send" type="submit" class="send" title="Senden">↑</button>
           <button id="stop" type="button" class="send stop hidden" title="Stopp">■</button>
         </div>
-        <p class="hint">Läuft offline auf eurem Server. Die KI kann Fehler machen.</p>
+        <p class="hint">Eure Chats werden nur auf eurem Server gespeichert. Die KI kann Fehler machen.</p>
       </form>
     </main>
   </div>
@@ -73,6 +73,10 @@
       <h3>Persönliche Anweisungen</h3>
       <p class="muted">Was soll die KI über dich wissen und wie soll sie antworten? (Gilt nur für dein Konto.)</p>
       <textarea id="system-prompt" rows="8" placeholder="z. B. Ich heiße Lena, studiere Medizin und mag kurze Antworten mit Beispielen."></textarea>
+      <h3 class="section">Passwort ändern</h3>
+      <input id="pw-old" type="password" placeholder="Altes Passwort" autocomplete="current-password">
+      <input id="pw-new" type="password" placeholder="Neues Passwort (leer lassen = nicht ändern)" autocomplete="new-password">
+      <p id="settings-error" class="error"></p>
       <div class="dialog-actions">
         <button value="cancel" class="secondary">Abbrechen</button>
         <button id="save-settings" value="save">Speichern</button>

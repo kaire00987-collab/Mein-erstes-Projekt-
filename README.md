@@ -1,106 +1,140 @@
-# Unsere KI – eure eigene, private KI
+# Unsere KI – euer privater Claude-Chat
 
-Ein eigener KI-Chat für euch zwei – sieht aus und funktioniert ähnlich wie die Claude-App:
+Euer eigener KI-Chat für zwei. Er sieht aus und funktioniert wie die Claude-App, läuft aber auf **eurer Synology NAS**:
 
-- 💬 Chats mit Verlauf, Suche, Umbenennen, Löschen
-- ⚡ Antworten erscheinen live Wort für Wort, mit Stopp- und „Neu generieren“-Knopf
+- 🧠 Das „Gehirn“ ist **Claude** (dieselbe KI wie in der Claude-App), angebunden über die offizielle API
+- 💾 **Alle Chats und Konten werden nur auf eurer NAS gespeichert**, nicht in einer Cloud
+- 👥 Ein eigenes Konto für jede Person – keiner sieht die Chats des anderen
+- 💬 Chat-Verlauf, Suche, Umbenennen, Löschen, Live-Antworten, Stopp- und „Neu“-Knopf
 - 📝 Schöne Formatierung (Listen, Tabellen, Code mit Kopieren-Knopf)
-- 👥 Eigenes Konto für jede Person – keiner sieht die Chats des anderen
-- 🧠 „Persönliche Anweisungen“: Jeder kann der KI sagen, was sie über ihn wissen soll
-- 📱 Läuft im Browser am PC und am Handy (lässt sich als App auf den Homescreen legen)
-- 🌙 Heller und dunkler Modus
-- 🔒 **Alles bleibt auf eurem Server** – Chats, Konten und das KI-Modell selbst
-- ✈️ **Funktioniert komplett offline**, sobald das Modell einmal heruntergeladen ist
+- 🙋 „Persönliche Anweisungen“: Jeder sagt der KI, was sie über ihn wissen soll
+- 📱 Läuft im Browser am Handy und PC (lässt sich als App auf den Homescreen legen)
 
-> **Ehrlicher Hinweis:** Das „Gehirn“ ist ein freies Open-Source-Modell (z. B. Qwen, Llama, Gemma),
-> das auf eurem Server läuft. Claude selbst kann man nicht herunterladen. Die freien Modelle sind gut
-> für Alltag, Texte, Erklärungen und einfachen Code, aber nicht ganz so stark wie Claude.
-> Je stärker euer Server, desto größer und klüger das Modell, das ihr nutzen könnt.
+## Was passiert mit euren Daten?
+
+| | Wo? |
+|---|---|
+| Chat-Verlauf, Konten, Passwörter (verschlüsselt), Einstellungen | **Nur auf eurer NAS** (`data/ki.db`) |
+| Die Nachrichten des aktuellen Chats | Werden zum Beantworten an Anthropic (die Firma hinter Claude) geschickt |
+
+Damit Claude antworten kann, muss es den Chat lesen. Das geht technisch nicht anders. Laut Anthropic werden
+Daten aus der API standardmäßig **nicht zum Training** der KI verwendet. Einzelheiten stehen in den
+[Datenschutzbestimmungen von Anthropic](https://www.anthropic.com/legal/privacy).
+Es wird immer nur der gerade offene Chat gesendet – nie eure anderen Chats oder die Daten der anderen Person.
+
+## Was kostet das?
+
+Die App selbst ist kostenlos. Für Claude bezahlt ihr nach Verbrauch bei Anthropic (Guthaben vorher aufladen, z. B. 10 €):
+
+| Modell | Wofür | Grobe Kosten |
+|---|---|---|
+| **Claude Opus 5.5** (Standard) | Am klügsten | ca. 1–5 Cent pro Nachricht, bei sehr langen Chats mehr |
+| Claude Sonnet 5.5 | Fast genauso gut, schneller | etwa die Hälfte |
+| Claude Haiku 5.5 | Einfache Fragen | Bruchteile eines Cents |
+
+Oben rechts im Chat könnt ihr jederzeit das Modell wechseln. **Tipp:** Legt im Anthropic-Konto unter
+„Limits“ eine monatliche Obergrenze fest, dann gibt es keine Überraschungen.
 
 ---
 
-## Was ihr braucht
+## Einrichtung auf der Synology (ca. 20 Minuten)
 
-- Einen Server oder PC mit **Linux, Windows oder Mac**, auf dem **[Docker](https://docs.docker.com/get-docker/)** installiert ist
-- Mindestens **8 GB RAM** (16 GB empfohlen) und ca. **10 GB freien Speicher**
-- Optional: eine **NVIDIA-Grafikkarte** – dann antwortet die KI viel schneller
+### Voraussetzung
 
-## Einrichtung (einmalig, ca. 15 Minuten)
+Eure NAS braucht den **Container Manager** (früher „Docker“). Öffnet das **Paket-Zentrum** und sucht nach
+„Container Manager“. Wird er angezeigt → installieren. Wird er nicht angezeigt, kann euer NAS-Modell leider
+keine Container ausführen (meist die „j“-Modelle); dann meldet euch, es gibt Alternativen.
+2 GB Arbeitsspeicher reichen für die App völlig aus.
 
-```bash
-# 1. Projekt holen
-git clone https://github.com/kaire00987-collab/Mein-erstes-Projekt-.git
-cd Mein-erstes-Projekt-
+### Schritt 1: API-Schlüssel holen
 
-# 2. Einstellungen anlegen (Name der KI usw. kann man in .env ändern)
-cp .env.example .env
+1. Auf **https://platform.claude.com** ein Konto anlegen
+2. Unter **Billing** Guthaben aufladen
+3. Unter **API Keys** → **Create Key** einen Schlüssel erstellen und kopieren (beginnt mit `sk-ant-`)
+   – der Schlüssel ist wie ein Passwort, nicht weitergeben!
 
-# 3. Starten
-docker compose up -d --build
+### Schritt 2: Dateien auf die NAS kopieren
 
-# 4. KI-Modell herunterladen (einmalig, ca. 5 GB – braucht Internet)
-docker compose exec ollama ollama pull qwen2.5:7b
+1. Auf GitHub bei diesem Projekt auf **Code → Download ZIP** klicken
+2. In der **File Station** im Ordner `docker` einen Ordner `unsere-ki` anlegen
+   (gibt es `docker` nicht, einfach anlegen)
+3. Die ZIP hochladen, rechtsklicken → **Hier entpacken**. Danach muss direkt in `docker/unsere-ki`
+   die Datei `docker-compose.yml` liegen (eventuell den Inhalt eines Unterordners eine Ebene nach oben verschieben)
 
-# 5. Eure beiden Konten anlegen (fragt jeweils nach einem Passwort)
-docker compose exec app python manage.py add-user lena
-docker compose exec app python manage.py add-user max
-```
+### Schritt 3: Einstellungen eintragen
 
-Fertig! Öffnet im Browser: **http://IP-EURES-SERVERS:3000**
-(auf dem Server selbst: http://localhost:3000)
+1. Die Datei `einstellungen.beispiel.env` kopieren und die Kopie in **`einstellungen.env`** umbenennen
+2. Mit dem **Texteditor** (aus dem Paket-Zentrum) öffnen und ausfüllen:
+   ```
+   ANTHROPIC_API_KEY=sk-ant-…euer-schlüssel…
+   INITIAL_USERS=lena:startpasswort1,max:startpasswort2
+   ```
+   (Namen und Passwörter natürlich anpassen.)
+3. Speichern
 
-Ab jetzt braucht ihr **kein Internet mehr** – nur noch das Heimnetz bzw. die Verbindung zum Server.
+### Schritt 4: Starten
 
-## Welches Modell passt zu eurem Server?
+1. **Container Manager** öffnen → **Projekt** → **Erstellen**
+2. Projektname: `unsere-ki`, Pfad: `docker/unsere-ki` auswählen
+3. Es wird erkannt, dass eine `docker-compose.yml` vorhanden ist → **Weiter** → **Fertig**
+4. Warten, bis der Build fertig ist (ein paar Minuten)
 
-| Euer Server | Modell | Befehl |
-|---|---|---|
-| 8 GB RAM, keine Grafikkarte | Qwen 2.5 3B (schnell, einfacher) | `docker compose exec ollama ollama pull qwen2.5:3b` |
-| 16 GB RAM **(Empfehlung)** | Qwen 2.5 7B (sehr gut auf Deutsch) | `docker compose exec ollama ollama pull qwen2.5:7b` |
-| 16 GB RAM | Llama 3.1 8B | `docker compose exec ollama ollama pull llama3.1:8b` |
-| 32 GB RAM oder Grafikkarte mit 16 GB+ | Gemma 3 27B / Qwen 2.5 32B (deutlich klüger) | `docker compose exec ollama ollama pull gemma3:27b` |
+### Schritt 5: Loslegen
 
-Ihr könnt mehrere Modelle laden und oben rechts im Chat zwischen ihnen wechseln.
-Das Standard-Modell für neue Chats stellt ihr in `.env` bei `DEFAULT_MODEL` ein.
-Alle Modelle: https://ollama.com/library
+Im Browser öffnen: **http://IP-EURER-NAS:3000**
+(Die IP findet ihr in der Synology-Systemsteuerung unter *Netzwerk*, z. B. `192.168.178.20`.)
 
-**Grafikkarte nutzen (NVIDIA):** In `docker-compose.yml` die Zeilen unter „Für NVIDIA-Grafikkarte“ einkommentieren,
-das [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html)
-installieren und `docker compose up -d` ausführen.
+Mit dem Namen und Startpasswort anmelden und dann über **⚙︎** (unten links) ein eigenes Passwort setzen.
 
-## Wo wird was gespeichert?
+**Am Handy als App:** Seite öffnen → Teilen/Menü → **„Zum Home-Bildschirm“**.
 
-Alles im Ordner `data/` auf eurem Server:
+---
 
-- `data/ki.db` – Konten (Passwörter verschlüsselt), alle Chats und Einstellungen
-- `data/ollama/` – die heruntergeladenen KI-Modelle
+## Weitere Einstellungen
 
-**Backup:** Einfach den Ordner `data/` kopieren.
+In `einstellungen.env`:
 
-## Nützliche Befehle
+| Einstellung | Bedeutung |
+|---|---|
+| `AI_NAME` | Name eurer KI (z. B. „Luna“) |
+| `DEFAULT_MODEL` | Modell für neue Chats: `claude-opus-5-5`, `claude-sonnet-5-5` oder `claude-haiku-5-5` |
+| `CLAUDE_EFFORT` | Wie gründlich Claude nachdenkt: `low` (schnell, günstig), `medium`, `high` (gründlich, teurer) |
 
-```bash
-docker compose exec app python manage.py list-users          # Konten anzeigen
-docker compose exec app python manage.py set-password lena   # Passwort ändern
-docker compose exec app python manage.py delete-user max     # Konto löschen
-docker compose logs -f app                                   # Protokoll ansehen
-docker compose down                                          # stoppen
-git pull && docker compose up -d --build                     # aktualisieren
-```
+Nach einer Änderung im Container Manager das Projekt **stoppen und neu starten**.
+
+## Backup
+
+Alles Wichtige liegt in `docker/unsere-ki/data/`. Diesen Ordner in **Hyper Backup** aufnehmen, fertig.
 
 ## Von unterwegs zugreifen (optional)
 
-Standardmäßig ist die KI nur in eurem Heimnetz erreichbar – das ist am sichersten.
-Wenn ihr auch unterwegs chatten wollt, ist **[Tailscale](https://tailscale.com/)** am einfachsten
-(kostenlos, verschlüsselt, kein Port-Freigeben am Router nötig).
-Wer die Seite stattdessen öffentlich über HTTPS (z. B. mit Caddy) betreibt, setzt in `.env` `COOKIE_SECURE=true`.
+Standardmäßig klappt es nur im Heimnetz – das ist am sichersten. Für unterwegs ist
+**[Tailscale](https://tailscale.com/)** am einfachsten: Es gibt Tailscale direkt im Synology-Paket-Zentrum
+und als App fürs Handy (kostenlos, verschlüsselt, keine Router-Einstellungen nötig).
+Wer die Seite stattdessen öffentlich über HTTPS betreibt (Synology *Reverse Proxy* + Let's-Encrypt-Zertifikat),
+setzt in `einstellungen.env` `COOKIE_SECURE=true`.
 
-## Aufbau (für Neugierige)
+## Für Technik-Fans
 
+**Per SSH statt Oberfläche:**
+```bash
+cd /volume1/docker/unsere-ki
+cp einstellungen.beispiel.env einstellungen.env   # ausfüllen
+sudo docker compose up -d --build
+sudo docker compose exec app python manage.py add-user NAME      # weiteres Konto
+sudo docker compose exec app python manage.py set-password NAME  # Passwort zurücksetzen
 ```
-docker-compose.yml   startet zwei Container: "ollama" (die KI) und "app" (die Webseite)
-app/main.py          Webserver (Python/FastAPI): Login, Chats, Weiterleitung an Ollama
+
+**Komplett offline (ohne Claude):** Auf einem Rechner mit mindestens 16 GB RAM (nicht die NAS) kann zusätzlich ein
+lokales Open-Source-Modell laufen: `docker compose --profile offline up -d`, dann
+`docker compose exec ollama ollama pull qwen2.5:7b` und in `einstellungen.env` `OLLAMA_URL=http://ollama:11434`.
+Lokale Modelle erscheinen dann zusätzlich in der Modellauswahl.
+
+**Aufbau:**
+```
+docker-compose.yml   startet die App (und optional Ollama)
+app/main.py          Webserver (Python/FastAPI): Login, Chats, Anbindung an Claude bzw. Ollama
 app/db.py            Datenbank (SQLite)
-app/manage.py        Benutzerverwaltung
-app/static/          Oberfläche (HTML, CSS, JavaScript – ohne externe Dateien, also offline-fähig)
+app/manage.py        Benutzerverwaltung per Kommandozeile
+app/static/          Oberfläche (HTML, CSS, JavaScript – ohne externe Dateien)
 ```

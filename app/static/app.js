@@ -17,6 +17,12 @@ async function api(path, opts = {}) {
 }
 const json = async (path, opts) => (await api(path, opts)).json();
 
+const MODEL_LABELS = {
+  "claude-opus-5-5": "Claude Opus 5.5",
+  "claude-sonnet-5-5": "Claude Sonnet 5.5",
+  "claude-haiku-5-5": "Claude Haiku 5.5",
+};
+
 // ---------- Anmeldung ----------
 function showLogin() {
   $("app-view").classList.add("hidden");
@@ -62,7 +68,7 @@ async function loadModels() {
     sel.innerHTML = `<option value="">${data.error || "Kein Modell installiert"}</option>`;
     return;
   }
-  for (const m of data.models) sel.add(new Option(m, m));
+  for (const m of data.models) sel.add(new Option(MODEL_LABELS[m] || m, m));
   sel.value = data.models.includes(state.me.default_model) ? state.me.default_model : data.models[0];
 }
 
@@ -300,9 +306,20 @@ $("open-settings").onclick = () => {
 };
 $("settings-form").addEventListener("submit", async (e) => {
   if (e.submitter?.value !== "save") return;
-  const system_prompt = $("system-prompt").value;
-  await api("/api/settings", { method: "PUT", body: { system_prompt } });
-  state.me.system_prompt = system_prompt;
+  e.preventDefault();
+  $("settings-error").textContent = "";
+  try {
+    const system_prompt = $("system-prompt").value;
+    await api("/api/settings", { method: "PUT", body: { system_prompt } });
+    state.me.system_prompt = system_prompt;
+    if ($("pw-new").value) {
+      await api("/api/password", { method: "PUT", body: { old: $("pw-old").value, new: $("pw-new").value } });
+      $("pw-old").value = $("pw-new").value = "";
+    }
+    $("settings").close();
+  } catch (err) {
+    $("settings-error").textContent = err.message;
+  }
 });
 
 // ---------- Handy-Seitenleiste ----------

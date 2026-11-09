@@ -44,7 +44,9 @@ button { cursor: pointer; }
 }
 .login-logo { width: 48px; margin: 0 auto; }
 .login-box h1 { text-align: center; margin: 0 0 8px; font-size: 1.5rem; font-weight: 600; }
-.login-box input, .search, dialog textarea {
+dialog input { margin-top: 8px; }
+dialog .section { margin-top: 16px; }
+.login-box input, .search, dialog textarea, dialog input {
   padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg); width: 100%;
 }
 .login-box button, .dialog-actions button {
