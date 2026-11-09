@@ -361,7 +361,7 @@ def manifest(request: Request):
         "short_name": AI_NAME,
         "start_url": "./",
         "display": "standalone",
-        "background_color": "#1f1e1d",
-        "theme_color": "#1f1e1d",
+        "background_color": "#10141c",
+        "theme_color": "#10141c",
         "icons": [{"src": "static/icon.svg", "sizes": "any", "type": "image/svg+xml"}],
     }
