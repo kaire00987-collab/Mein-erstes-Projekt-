@@ -280,7 +280,7 @@ async def send_message(chat_id: int, data: MessageIn, user=Depends(current_user)
 async def stream_claude(model: str, system: str, messages: list[dict]):
     """Claude über die Anthropic-API. Nur die Nachrichten dieses Chats werden gesendet."""
     if not claude:
-        yield "error", "Kein ANTHROPIC_API_KEY eingetragen (siehe README)."
+        yield "error", "Kein API-Schlüssel eingetragen (Add-on-Konfiguration bzw. einstellungen.env)."
         return
     try:
         async with claude.beta.messages.stream(
@@ -302,7 +302,7 @@ async def stream_claude(model: str, system: str, messages: list[dict]):
         elif final.stop_reason == "max_tokens":
             yield "text", "\n\n_(Antwort war zu lang und wurde abgeschnitten.)_"
     except anthropic.AuthenticationError:
-        yield "error", "Der API-Schlüssel ist ungültig. Bitte in einstellungen.env prüfen."
+        yield "error", "Der API-Schlüssel ist ungültig. Bitte neu kopieren und in der Add-on-Konfiguration (bzw. einstellungen.env) eintragen, dann neu starten."
     except anthropic.PermissionDeniedError as e:
         yield "error", f"Keine Berechtigung für dieses Modell: {e.message}"
     except anthropic.RateLimitError:
