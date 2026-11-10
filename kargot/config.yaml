@@ -1,5 +1,5 @@
 name: Kargot
-version: "1.0.1"
+version: "1.0.2"
 slug: kargot
 description: Eure private KI – die Chats bleiben bei euch zu Hause
 url: https://github.com/kaire00987-collab/Mein-erstes-Projekt-
@@ -12,6 +12,7 @@ ingress: true
 ingress_port: 8000
 panel_icon: mdi:robot-happy-outline
 panel_title: Kargot
+panel_admin: false
 options:
   api_key: ""
   ai_name: Kargot
