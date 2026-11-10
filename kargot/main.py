@@ -28,7 +28,8 @@ HA_INGRESS = os.environ.get("HA_INGRESS", "false").lower() == "true"
 HA_PROXY_IP = os.environ.get("HA_PROXY_IP", "172.30.32.2")
 
 OLLAMA_URL = os.environ.get("OLLAMA_URL", "").rstrip("/")  # leer = keine Offline-Modelle
-ANTHROPIC_KEY = os.environ.get("ANTHROPIC_API_KEY", "").strip()
+# Schlüssel enthalten nie Leerzeichen – versehentlich mitkopierte Umbrüche/Leerzeichen entfernen
+ANTHROPIC_KEY = "".join(os.environ.get("ANTHROPIC_API_KEY", "").split())
 CLAUDE_MODELS = [m.strip() for m in os.environ.get(
     "CLAUDE_MODELS", "claude-opus-5-5,claude-sonnet-5-5,claude-haiku-5-5").split(",") if m.strip()]
 DEFAULT_MODEL = os.environ.get("DEFAULT_MODEL", "claude-opus-5-5")
@@ -302,7 +303,12 @@ async def stream_claude(model: str, system: str, messages: list[dict]):
         elif final.stop_reason == "max_tokens":
             yield "text", "\n\n_(Antwort war zu lang und wurde abgeschnitten.)_"
     except anthropic.AuthenticationError:
-        yield "error", "Der API-Schlüssel ist ungültig. Bitte neu kopieren und in der Add-on-Konfiguration (bzw. einstellungen.env) eintragen, dann neu starten."
+        yield "error", (
+            f"Der API-Schlüssel wird nicht akzeptiert. Eingetragen ist ein Schlüssel, der mit "
+            f"„{ANTHROPIC_KEY[:12]}…“ beginnt und {len(ANTHROPIC_KEY)} Zeichen lang ist "
+            "(vollständige Schlüssel haben meist über 90 Zeichen). Bitte einen neuen Schlüssel erstellen, "
+            "komplett kopieren, in der Add-on-Konfiguration (bzw. einstellungen.env) eintragen und neu starten."
+        )
     except anthropic.PermissionDeniedError as e:
         yield "error", f"Keine Berechtigung für dieses Modell: {e.message}"
     except anthropic.RateLimitError:
