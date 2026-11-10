@@ -10,6 +10,8 @@
 - 🙋 „Persönliche Anweisungen“: Jeder sagt der KI, was sie über ihn wissen soll
 - 📱 Läuft im Browser am Handy und PC (lässt sich als App auf den Homescreen legen)
 
+> 📖 **Genaue Schritt-für-Schritt-Anleitung für Home Assistant inkl. Sprachsteuerung: [ANLEITUNG.md](ANLEITUNG.md)**
+
 ## Was passiert mit euren Daten?
 
 | | Wo? |
