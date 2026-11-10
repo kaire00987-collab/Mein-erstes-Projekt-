@@ -1,0 +1,19 @@
+services:
+  app:
+    build: ./kargot
+    restart: unless-stopped
+    ports:
+      - "3000:8000"                   # links: Port, unter dem die Seite erreichbar ist
+    env_file: einstellungen.env
+    volumes:
+      - ./data:/data                  # Chats & Konten (ki.db) – bleiben auf eurem Server
+
+  # Optional: lokale Offline-Modelle (braucht einen Rechner mit 16 GB RAM, NICHT die NAS)
+  # Starten mit: docker compose --profile offline up -d
+  # und in einstellungen.env setzen: OLLAMA_URL=http://ollama:11434
+  ollama:
+    image: ollama/ollama:latest
+    profiles: ["offline"]
+    restart: unless-stopped
+    volumes:
+      - ./data/ollama:/root/.ollama

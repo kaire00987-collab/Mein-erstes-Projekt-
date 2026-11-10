@@ -1,0 +1,13 @@
+configuration:
+  api_key:
+    name: API-Schlüssel
+    description: Euer Schlüssel von platform.claude.com (beginnt mit sk-ant-)
+  ai_name:
+    name: Name der KI
+    description: So heißt eure KI in der Oberfläche
+  model:
+    name: Standard-Modell
+    description: "claude-opus-5-5 = Kargot Max (am klügsten), claude-sonnet-5-5 = Kargot Schnell, claude-haiku-5-5 = Kargot Mini (am günstigsten)"
+  effort:
+    name: Gründlichkeit
+    description: "low = schnell und günstig, medium = ausgewogen, high = gründlich, aber teurer"
